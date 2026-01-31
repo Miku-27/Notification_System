@@ -22,8 +22,8 @@ class NotificationTable(Base):
     __table_args__ = (
         Index(
             "index_unprocessed_notification",
-            "priority","created_at",
-            postgresql_where=text("status = 'pending'")
+            priority,created_at,
+            postgresql_where=status == StatusEnum.PENDING
         ),
     )
 
@@ -31,9 +31,13 @@ class TemplateTable(Base):
     __tablename__="template_table"
 
     id: Mapped[int] = mapped_column(Integer,primary_key=True,nullable=False,autoincrement=True)
-    slug:Mapped[str] = mapped_column(String,nullable=False)
-    template_name:Mapped[str]= mapped_column(String,nullable=False)
+    owner_id :Mapped[int] = mapped_column(Integer,ForeignKey("api_key_table.id"),nullable=False)
+    slug:Mapped[str] = mapped_column(String(255),nullable=False)
+    template_name:Mapped[str]= mapped_column(String(255),nullable=False)
     template_body:Mapped[str] = mapped_column(Text,nullable=False)
+
+    subject:Mapped[str] = mapped_column(String(255),nullable=True)
+    title:Mapped[str] = mapped_column(String(255),nullable=True)
 
 class ApikeyTable(Base):
     __tablename__ = "api_key_table"
