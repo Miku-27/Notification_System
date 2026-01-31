@@ -1,17 +1,18 @@
 from sqlalchemy.orm import Mapped,mapped_column
 from sqlalchemy import String, Text,Integer,ForeignKey ,Index,text,DateTime,Enum as PostgresEnum
-from app.models.base import Base
+from app.models.database import Base
 from sqlalchemy.dialects.postgresql import JSONB
 from datetime import datetime,timezone
-from app.models.types import StatusEnum,PriorityEnum
+from app.models.types import StatusEnum,PriorityEnum,NotificationTypeEnum
 
 class NotificationTable(Base):
     __tablename__ = "notification_table"
 
     id: Mapped[int] = mapped_column(Integer,primary_key=True,nullable=False,autoincrement=True)
-    to:Mapped[str] = mapped_column(String(255),nullable=False)
-    recipient:Mapped[str] = mapped_column(String(255),nullable=False)
-    template_id:Mapped[int] = mapped_column(Integer,nullable=False)
+    sender_address:Mapped[str] = mapped_column(String(255),nullable=False)
+    notification_type:Mapped[str] = mapped_column(PostgresEnum(NotificationTypeEnum,name="notification_type",create_type=True))
+    recipient_address:Mapped[str] = mapped_column(String(255),nullable=False)
+    template_id:Mapped[int] = mapped_column(Integer,ForeignKey("template_table.id"),nullable=False)
     data:Mapped[dict] = mapped_column(JSONB,nullable=True)
     created_at:Mapped[datetime] = mapped_column(DateTime,default=datetime.now(timezone.utc))
     scheduled_at:Mapped[datetime] = mapped_column(DateTime,nullable=True)
@@ -23,7 +24,7 @@ class NotificationTable(Base):
             "index_unprocessed_notification",
             "priority","created_at",
             postgresql_where=text("status = 'pending'")
-        )
+        ),
     )
 
 class TemplateTable(Base):
