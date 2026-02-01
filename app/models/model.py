@@ -43,5 +43,5 @@ class ApikeyTable(Base):
     __tablename__ = "api_key_table"
 
     id: Mapped[int] = mapped_column(Integer,primary_key=True,nullable=False,autoincrement=True)
-    apikey_name:Mapped[str] = mapped_column(String,nullable=False)
+    apikey_name:Mapped[str] = mapped_column(String,nullable=False,unique=True)
     apikey_hash:Mapped[str] = mapped_column(String,nullable=False,unique=True)

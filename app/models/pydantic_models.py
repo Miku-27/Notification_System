@@ -38,3 +38,7 @@ class TemplateModel(BaseModel):
 
     subject:str|None = Field(None, min_length=1)
     title:str|None=Field(None, min_length=1)
+
+class ProjectModel(BaseModel):
+    project_name:str
+    
