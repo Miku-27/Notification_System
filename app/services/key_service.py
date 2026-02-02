@@ -64,7 +64,7 @@ def add_indentity(db,indentity_dict):
             'code':ResultCodes.INTERNAL_SERVER_ERROR
         }
 
-def remove_indentity(db,indentity_dict):
+def delete_indentity(db,indentity_dict):
     try:
         indentity = db.query(ApikeyTable.id).filter(ApikeyTable.apikey_name == indentity_dict['indentity_name']).first()
         if not indentity:

@@ -12,3 +12,5 @@ class StatusEnum(str, Enum):
 class NotificationTypeEnum(str, Enum):
     email = "email"
     sms = "sms"
+
+PHONE_REGEX = r"^\+[1-9]\d{7,14}$"

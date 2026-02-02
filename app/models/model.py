@@ -13,12 +13,18 @@ class NotificationTable(Base):
     notification_type:Mapped[str] = mapped_column(PostgresEnum(NotificationTypeEnum,name="notification_type",create_type=True))
     recipient_address:Mapped[str] = mapped_column(String(255),nullable=False)
     template_id:Mapped[int] = mapped_column(Integer,ForeignKey("template_table.id"),nullable=False)
+
     data:Mapped[dict] = mapped_column(JSONB,nullable=True)
+    
     created_at:Mapped[datetime] = mapped_column(DateTime,default=datetime.now(timezone.utc))
     scheduled_at:Mapped[datetime] = mapped_column(DateTime,nullable=True)
     priority:Mapped[PriorityEnum] = mapped_column(PostgresEnum(PriorityEnum,name="priority_level",create_type=True),default=PriorityEnum.LOW)
-    callback_url:Mapped[str] = mapped_column(String(255),nullable=True)
+    
     status:Mapped[StatusEnum] = mapped_column(PostgresEnum(StatusEnum,name="notification_status",create_type=True),default=StatusEnum.PENDING)
+    
+    # not needed right now
+    # callback_url:Mapped[str] = mapped_column(String(255),nullable=True) 
+    
     __table_args__ = (
         Index(
             "index_unprocessed_notification",
@@ -34,10 +40,8 @@ class TemplateTable(Base):
     owner_id :Mapped[int] = mapped_column(Integer,ForeignKey("api_key_table.id"),nullable=False)
     slug:Mapped[str] = mapped_column(String(255),nullable=False)
     template_name:Mapped[str]= mapped_column(String(255),nullable=False)
-    template_body:Mapped[str] = mapped_column(Text,nullable=False)
-
-    subject:Mapped[str] = mapped_column(String(255),nullable=True)
-    title:Mapped[str] = mapped_column(String(255),nullable=True)
+    template_type:Mapped[str]=mapped_column(String(50),nullable=False)
+    content:Mapped[str] = mapped_column(JSONB,nullable=False)
 
 class ApikeyTable(Base):
     __tablename__ = "api_key_table"
