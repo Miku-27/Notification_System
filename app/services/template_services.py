@@ -7,7 +7,7 @@ def _get_template_id(db,slug_name):
         return template_id
     return None
     
-def add_new_template(db,template_dict,indentity_id):
+def add_new_template(db,template_dict,identity_id):
     try:       
         template_exist = db.query(TemplateTable).filter(TemplateTable.slug == template_dict['slug']).first()
         if template_exist:
@@ -16,7 +16,7 @@ def add_new_template(db,template_dict,indentity_id):
                 'code':ResultCodes.TEMPLATE_ALREADY_EXIST
             }
 
-        new_template = TemplateTable(**template_dict,owner_id=indentity_id)
+        new_template = TemplateTable(**template_dict,owner_id=identity_id)
         db.add(new_template)
         db.commit()
         return {
@@ -31,11 +31,11 @@ def add_new_template(db,template_dict,indentity_id):
             'code':ResultCodes.INTERNAL_SERVER_ERROR
         }
     
-def remove_template(db,slug,indentity_id):
+def remove_template(db,slug,identity_id):
     try:       
         template_exist = db.query(TemplateTable).filter(
             TemplateTable.slug == slug,
-            TemplateTable.owner_id == indentity_id
+            TemplateTable.owner_id == identity_id
         ).first()
 
         if not template_exist:
@@ -58,11 +58,11 @@ def remove_template(db,slug,indentity_id):
             'code':ResultCodes.INTERNAL_SERVER_ERROR
         }
     
-def update_template(db,template_dict,slug,indentity_id):
+def update_template(db,template_dict,slug,identity_id):
     try:       
         template_exist = db.query(TemplateTable).filter(
             TemplateTable.slug == slug,
-            TemplateTable.owner_id == indentity_id
+            TemplateTable.owner_id == identity_id
         ).first()
 
         if not template_exist:
@@ -73,7 +73,7 @@ def update_template(db,template_dict,slug,indentity_id):
 
         for key,value in template_dict.items():
             setattr(template_exist,key,value)
-        template_exist.owner_id=indentity_id
+        template_exist.owner_id=identity_id
 
         db.commit()
         return {
@@ -88,10 +88,10 @@ def update_template(db,template_dict,slug,indentity_id):
             'code':ResultCodes.INTERNAL_SERVER_ERROR
         }
 
-def get_all_template(db,indentity_id):
+def get_all_template(db,identity_id):
     try:       
         template_list = db.query(TemplateTable.slug,TemplateTable.template_name).filter(
-            TemplateTable.owner_id == indentity_id
+            TemplateTable.owner_id == identity_id
         ).all()
 
         return {
@@ -106,7 +106,7 @@ def get_all_template(db,indentity_id):
             'code':ResultCodes.INTERNAL_SERVER_ERROR
         }
     
-def get_template_by_slug(db,slug,indentity_id):
+def get_template_by_slug(db,slug,identity_id):
     try:       
         template_list = db.query(
             TemplateTable.slug,
@@ -115,7 +115,7 @@ def get_template_by_slug(db,slug,indentity_id):
             TemplateTable.title,
             TemplateTable.template_body).filter(
 
-            TemplateTable.owner_id == indentity_id,
+            TemplateTable.owner_id == identity_id,
             TemplateTable.slug == slug
         ).first()
 

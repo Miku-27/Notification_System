@@ -34,22 +34,22 @@ def verify_api_key(db,key_name,key):
             'data': None
         }
 
-def add_indentity(db,indentity_dict):
+def add_identity(db,identity_dict):
     try:
-        indentity = db.query(ApikeyTable.id).filter(ApikeyTable.apikey_name == indentity_dict['indentity_name']).first()
-        if indentity:
+        identity = db.query(ApikeyTable.id).filter(ApikeyTable.apikey_name == identity_dict['identity_name']).first()
+        if identity:
             return {
                 'success':False,
                 'code':ResultCodes.IDENTITY_ALREADY_EXIST
             }
         
         api_key = _hash_api_key(_generate_api_key())
-        indentity = ApikeyTable(
-            apikey_name = indentity_dict['indentity_name'],
+        identity = ApikeyTable(
+            apikey_name = identity_dict['identity_name'],
             apikey_hash = api_key
         )
 
-        db.add(indentity)
+        db.add(identity)
         db.commit() 
         return {
             'success':True,
@@ -64,16 +64,16 @@ def add_indentity(db,indentity_dict):
             'code':ResultCodes.INTERNAL_SERVER_ERROR
         }
 
-def delete_indentity(db,indentity_dict):
+def delete_identity(db,identity_dict):
     try:
-        indentity = db.query(ApikeyTable.id).filter(ApikeyTable.apikey_name == indentity_dict['indentity_name']).first()
-        if not indentity:
+        identity = db.query(ApikeyTable.id).filter(ApikeyTable.apikey_name == identity_dict['identity_name']).first()
+        if not identity:
             return {
                 'success':False,
                 'code':ResultCodes.IDENTITY_NOT_FOUND
             }
         
-        db.delete(indentity)
+        db.delete(identity)
         db.commit() 
         return {
             'success':True,
@@ -88,18 +88,18 @@ def delete_indentity(db,indentity_dict):
             'code':ResultCodes.INTERNAL_SERVER_ERROR
         }
     
-def generate_new_apiKey(db,indentity_dict):
+def update_Identity_key(db,identity_dict):
     try:
-        indentity = db.query(ApikeyTable.id).filter(ApikeyTable.apikey_name == indentity_dict['indentity_name']).first()
-        if not indentity:
+        identity = db.query(ApikeyTable.id).filter(ApikeyTable.apikey_name == identity_dict['identity_name']).first()
+        if not identity:
             return {
                 'success':False,
                 'code':ResultCodes.IDENTITY_NOT_FOUND
             }
         
         api_key = _hash_api_key(_generate_api_key())
-        indentity = ApikeyTable(
-            apikey_name = indentity_dict['indentity_name'],
+        identity = ApikeyTable(
+            apikey_name = identity_dict['identity_name'],
             apikey_hash = api_key
         )
         db.commit() 

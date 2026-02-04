@@ -13,3 +13,9 @@ async def create_notification_route(notification: NotificationModel,db=Depends(g
     response = register_notification(notification_dict = notification.model_dump(),db=db)
     
     return make_response(response)
+
+@notification_router.post("")
+async def create_notification_route(notification: NotificationModel,db=Depends(get_db)):
+    response = register_notification(notification_dict = notification.model_dump(),db=db)
+    
+    return make_response(response)

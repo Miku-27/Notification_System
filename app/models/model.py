@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Mapped,mapped_column
-from sqlalchemy import String, Text,Integer,ForeignKey ,Index,text,DateTime,Enum as PostgresEnum
+from sqlalchemy import String,Integer,ForeignKey ,Index,text,DateTime,Enum as PostgresEnum
+from sqlalchemy.sql import func
 from app.models.database import Base
 from sqlalchemy.dialects.postgresql import JSONB
-from datetime import datetime,timezone
+from datetime import datetime
 from app.models.types import StatusEnum,PriorityEnum,NotificationTypeEnum
 
 class NotificationTable(Base):
@@ -10,13 +11,13 @@ class NotificationTable(Base):
 
     id: Mapped[int] = mapped_column(Integer,primary_key=True,nullable=False,autoincrement=True)
     sender_address:Mapped[str] = mapped_column(String(255),nullable=False)
-    notification_type:Mapped[str] = mapped_column(PostgresEnum(NotificationTypeEnum,name="notification_type",create_type=True))
+    notification_type:Mapped[str] = mapped_column(PostgresEnum(NotificationTypeEnum,name="notification_type",create_type=True),nullable=False)
     recipient_address:Mapped[str] = mapped_column(String(255),nullable=False)
-    template_id:Mapped[int] = mapped_column(Integer,ForeignKey("template_table.id"),nullable=False)
+    template_id:Mapped[int] = mapped_column(Integer,ForeignKey("template_table.id"),nullable=True)
 
-    data:Mapped[dict] = mapped_column(JSONB,nullable=True)
+    rendered_notification:Mapped[dict] = mapped_column(JSONB,nullable=False)
     
-    created_at:Mapped[datetime] = mapped_column(DateTime,default=datetime.now(timezone.utc))
+    created_at:Mapped[datetime] = mapped_column(DateTime(timezone=True),server_default=func.now())
     scheduled_at:Mapped[datetime] = mapped_column(DateTime,nullable=True)
     priority:Mapped[PriorityEnum] = mapped_column(PostgresEnum(PriorityEnum,name="priority_level",create_type=True),default=PriorityEnum.LOW)
     
