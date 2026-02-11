@@ -1,5 +1,5 @@
 from fastapi import APIRouter,Depends
-from app.models.pydantic_models import TemplateModel
+from app.models.schemas import TemplateModel
 from app.models.database import get_db
 from app.services.template_services import add_new_template,remove_template,update_template,get_all_template,get_template_by_slug
 from app.dependencies import validate_api_key

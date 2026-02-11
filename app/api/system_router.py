@@ -1,5 +1,5 @@
 from fastapi import APIRouter,Depends
-from app.models.pydantic_models import identityModel
+from app.models.schemas import identityModel
 from app.models.database import get_db
 from app.services.key_service import add_identity,delete_identity,update_Identity_key
 from app.utils.response import make_response

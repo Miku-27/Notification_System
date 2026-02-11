@@ -8,6 +8,9 @@ class ResultCodes(str,Enum):
     TEMPLATE_NOT_FOUND = "TEMPLATE_NOT_FOUND"
     TEMPLATE_DELETED = "TEMPLATE_DELETED"
     TEMPLATE_UPDATED = "TEMPLATE_UPDATED"
+    TEMPLATE_SYNTAX_ERROR="TEMPLATE_SYNTAX_ERROR"
+    TEMPLATE_RENDER_ERROR="TEMPLATE_RENDER_ERROR"
+    TEMPLATE_MISSING_VARAIABLE="TEMPLATE_MISSING_VARAIABLE"
 
     IDENTITY_CREATED = "IDENTITY_CREATED"
     IDENTITY_DELETED = "IDENTITY_DELETED"
@@ -32,6 +35,10 @@ HTTP_CODE_MAP = {
     "TEMPLATE_NOT_FOUND": status.HTTP_404_NOT_FOUND,
     "TEMPLATE_DELETED": status.HTTP_200_OK,
     "TEMPLATE_UPDATED": status.HTTP_200_OK,
+    "TEMPLATE_SYNTAX_ERROR": status.HTTP_422_UNPROCESSABLE_CONTENT,
+    "TEMPLATE_MISSING_VARIABLE": status.HTTP_400_BAD_REQUEST,
+    "TEMPLATE_RENDER_ERROR": status.HTTP_500_INTERNAL_SERVER_ERROR,
+    
 
     "IDENTITY_CREATED": status.HTTP_201_CREATED,
     "IDENTITY_DELETED": status.HTTP_200_OK,
@@ -54,6 +61,9 @@ MESSAGE_MAP = {
     "TEMPLATE_NOT_FOUND": "The requested template could not be found.",
     "TEMPLATE_DELETED": "Template has been successfully deleted.",
     "TEMPLATE_UPDATED": "Template has been successfully updated.",
+    "TEMPLATE_SYNTAX_ERROR": "The template contains invalid Jinja2 syntax.",
+    "TEMPLATE_MISSING_VARAIABLE": "The template requires variables that were not provided in payload_data.",
+    "TEMPLATE_RENDER_ERROR": "An unexpected error occurred while rendering the template.",
 
     "IDENTITY_CREATED": "Identity and API key created successfully.",
     "IDENTITY_DELETED": "Identity has been removed from the system.",

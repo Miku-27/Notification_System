@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Literal,Annotated
 from pydantic import BaseModel, Field, EmailStr,StringConstraints
-from app.models.types import PriorityEnum,NotificationTypeEnum,PHONE_REGEX
+from app.models.types import PriorityEnum,PHONE_REGEX
+from dataclasses import dataclass
 
 #identity model , might add more later
 class identityModel(BaseModel):
@@ -29,64 +30,38 @@ class NotificationBaseModel(BaseModel):
     priority:PriorityEnum = PriorityEnum.LOW
 
 #single notification model
-class SingleEmailNotificationModel(NotificationBaseModel):
-    mode:Literal["single"]
-    notification_type:Literal['email']
+class EmailNotificationModel(NotificationBaseModel):
+    mode:Literal["email"]
 
     sender_address : EmailStr
-    recipient_address : EmailStr
+    recipient_address : list[EmailStr]
     
     template_id:str | None
     custom_template: EmailContentModel | None = None
     payload_data:dict | None = None
 
-class SingleSmsNotificationModel(NotificationBaseModel):
-    mode:Literal["single"]
-    notification_type:Literal['sms']
+class SmsNotificationModel(NotificationBaseModel):
+    mode:Literal["sms"]
 
     sender_address : Annotated[str,StringConstraints(pattern=PHONE_REGEX)]
-    recipient_address : Annotated[str,StringConstraints(pattern=PHONE_REGEX)]
+    recipient_address : list[Annotated[str,StringConstraints(pattern=PHONE_REGEX)]]
     
     template_id:str | None
     custom_template: SmsContentModel | None = None
     payload_data:dict | None = None
 
-#fan out or broadcast notificaiton
-class FanoutEmailNotification(NotificationBaseModel):
-    mode:Literal["fanout"]
-    notification_type:Literal['email']
-
-    sender_address: EmailStr
-    recipient_address: list[EmailStr]
-    
-    template_id: int | None
-    custom_template: EmailContentModel | None = None
-    payload_data: dict | None = None
-
-class FanoutSmsNotification(NotificationBaseModel):
-    mode:Literal["fanout"]
-    notification_type:Literal['sms']
-
-    sender_address: EmailStr
-    recipient_address: list[EmailStr]
-    
-    template_id: int | None
-    custom_template: SmsContentModel | None = None
-    payload_data: dict | None
-
 #batch notification
+#checks each with SingleEmailNotificationModel | SingleSmsNotificationModel so but bad performance , works for now
 class BatchNotificationModel(BaseModel):
     mode:Literal['batch']
-    notificaions:list[SingleEmailNotificationModel]
+    notificaions:list[EmailNotificationModel | SmsNotificationModel]
 
 NotificationModel = Annotated[
     
-    SingleEmailNotificationModel |
-    SingleSmsNotificationModel |
-    FanoutEmailNotification |
-    FanoutSmsNotification |
+    EmailNotificationModel |
+    SmsNotificationModel |
     BatchNotificationModel,    
-    Field(discriminator="mode"),
+    Field(discriminator="mode")
 ]
 
 
@@ -102,3 +77,12 @@ class CustomSmsModel(NotificationBaseModel):
     content: SmsContentModel
     sender_address: Annotated[str, StringConstraints(pattern=PHONE_REGEX)]
     recipient_address: Annotated[str, StringConstraints(pattern=PHONE_REGEX)]
+
+
+#dataclass models
+
+@dataclass(frozen=True)
+class ResolvedTemplate:
+    template_id: str | None
+    content: dict
+    is_custom: bool | None

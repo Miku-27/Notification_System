@@ -1,20 +1,20 @@
 from app.models.model import TemplateTable
 from app.utils.response import ResultCodes
+from app.template_engine.jinja import get_template_engine
+from app.utils.exceptions import ServiceException 
+from app.models.schemas import ResolvedTemplate
 
-def _get_template_id(db,slug_name):
-    template_id = db.query(TemplateTable.id).filter(TemplateTable.slug == slug_name).first()
-    if template_id:
-        return template_id
+def _get_template(db,slug_name):
+    template = db.query(TemplateTable).filter(TemplateTable.slug == slug_name).first()
+    if template:
+        return template
     return None
     
 def add_new_template(db,template_dict,identity_id):
     try:       
         template_exist = db.query(TemplateTable).filter(TemplateTable.slug == template_dict['slug']).first()
         if template_exist:
-            return {
-                'success':False,
-                'code':ResultCodes.TEMPLATE_ALREADY_EXIST
-            }
+            raise ServiceException(ResultCodes.TEMPLATE_ALREADY_EXIST)
 
         new_template = TemplateTable(**template_dict,owner_id=identity_id)
         db.add(new_template)
@@ -26,10 +26,7 @@ def add_new_template(db,template_dict,identity_id):
     except Exception as e:
         print(e)
         db.rollback()
-        return {
-            'success':False,
-            'code':ResultCodes.INTERNAL_SERVER_ERROR
-        }
+        raise ServiceException(ResultCodes.INTERNAL_SERVER_ERROR)
     
 def remove_template(db,slug,identity_id):
     try:       
@@ -39,10 +36,7 @@ def remove_template(db,slug,identity_id):
         ).first()
 
         if not template_exist:
-            return {
-                'success':False,
-                'code':ResultCodes.TEMPLATE_NOT_FOUND
-            }
+            raise ServiceException(ResultCodes.TEMPLATE_NOT_FOUND)
 
         db.delete(template_exist)
         db.commit()
@@ -53,10 +47,7 @@ def remove_template(db,slug,identity_id):
     except Exception as e:
         print(e)
         db.rollback()
-        return {
-            'success':False,
-            'code':ResultCodes.INTERNAL_SERVER_ERROR
-        }
+        raise ServiceException(ResultCodes.INTERNAL_SERVER_ERROR)
     
 def update_template(db,template_dict,slug,identity_id):
     try:       
@@ -66,10 +57,7 @@ def update_template(db,template_dict,slug,identity_id):
         ).first()
 
         if not template_exist:
-            return {
-                'success':False,
-                'code':ResultCodes.TEMPLATE_NOT_FOUND
-            }
+            raise ServiceException(ResultCodes.TEMPLATE_NOT_FOUND)
 
         for key,value in template_dict.items():
             setattr(template_exist,key,value)
@@ -83,10 +71,7 @@ def update_template(db,template_dict,slug,identity_id):
     except Exception as e:
         print(e)
         db.rollback()
-        return {
-            'success':False,
-            'code':ResultCodes.INTERNAL_SERVER_ERROR
-        }
+        raise ServiceException(ResultCodes.INTERNAL_SERVER_ERROR)
 
 def get_all_template(db,identity_id):
     try:       
@@ -101,10 +86,7 @@ def get_all_template(db,identity_id):
         }
     except Exception as e:
         print(e)
-        return {
-            'success':False,
-            'code':ResultCodes.INTERNAL_SERVER_ERROR
-        }
+        raise ServiceException(ResultCodes.INTERNAL_SERVER_ERROR)
     
 def get_template_by_slug(db,slug,identity_id):
     try:       
@@ -126,7 +108,28 @@ def get_template_by_slug(db,slug,identity_id):
         }
     except Exception as e:
         print(e)
-        return {
-            'success':False,
-            'code':ResultCodes.INTERNAL_SERVER_ERROR
-        }
+        raise ServiceException(ResultCodes.INTERNAL_SERVER_ERROR)
+    
+def _validate_template(template_content,payload):
+    jinja_template_engine = get_template_engine()
+    response = jinja_template_engine.validate(template_content,payload)
+        
+def _resolve_template(db,notification_dict):
+    if  notification_dict['template']:
+        template = _get_template(db,notification_dict.get('slug'))
+        if template is None:
+            raise ServiceException(ResultCodes.TEMPLATE_NOT_FOUND)
+        
+        template_content = template.content
+        is_custom=False
+        template_id = template.id
+    else:
+        template_content = notification_dict.get('custom_template')
+        template_id = None
+        is_custom=False
+
+    return ResolvedTemplate(
+        template_id=template_id,
+        is_custom=is_custom,
+        content=template_content
+    )
